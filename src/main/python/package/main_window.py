@@ -102,15 +102,15 @@ class MainWindow(QtWidgets.QWidget):
 
         self.thread = QtCore.QThread(self)
         
-        self.obj = Worker(images_to_convert=images_lw_items,
+        self.worker = Worker(images_to_convert=images_lw_items,
                           quality=quality,
                           size=size,
                           folder=folder)
 
-        self.obj.moveToThread(self.thread)
-        self.obj.image_converted.connect(self.image_converted)
-        self.obj.finished.connect(self.thread.quit)
-        self.thread.started.connect(self.obj.convert_images)
+        self.worker.moveToThread(self.thread)
+        self.worker.image_converted.connect(self.image_converted)
+        self.worker.finished.connect(self.thread.quit)
+        self.thread.started.connect(self.worker.convert_images)
         self.thread.start()
         
         self.prg_dialog = QtWidgets.QProgressDialog("Conversion des images", "Annuler...", 1, len(images_to_process))
@@ -120,7 +120,6 @@ class MainWindow(QtWidgets.QWidget):
     def abort(self):
         self.obj.runs = False
         self.thread.quit()
-        self.thread.wait()
 
     def delete_selected_items(self):
         for lw_item in self.lw_files.selectedItems():
@@ -141,13 +140,9 @@ class MainWindow(QtWidgets.QWidget):
         self.lbl_dropInfo.setVisible(False)
 
     def dropEvent(self, event):
-        if event.mimeData().hasUrls:
-            event.accept()
-            for url in event.mimeData().urls():
-                filepath = str(url.toLocalFile())
-                self.add_file(path=filepath)
-        else:
-            event.ignore()
+        event.accept()
+        for url in event.mimeData().urls():
+            self.add_file(path=url.toLocalFile())
         
         self.lbl_dropInfo.setVisible(False)
 

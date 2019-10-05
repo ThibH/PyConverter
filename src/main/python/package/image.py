@@ -2,10 +2,8 @@ import os
 
 from PIL import Image 
 
-class CustomImage():
+class CustomImage:
     def __init__(self, path, folder="reduced"):
-        super().__init__()
-
         self.image = Image.open(path)
         self.width, self.height = self.image.size
         self.path = path
